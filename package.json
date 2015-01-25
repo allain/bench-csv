@@ -1,6 +1,6 @@
 {
   "name": "bench-csv",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "benchmarking tool that spits its results out in csv format",
   "author": {
     "name": "Allain Lalonde",
