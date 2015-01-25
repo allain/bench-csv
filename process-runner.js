@@ -19,7 +19,7 @@ module.exports = function(command, cb) {
   });
 
   p.on('close', function(code) {
-    if (code === 0) {
+    if (code == 0) {
       cb(null, output.join(''));
     } else {
       cb(new Error('error running process'), error.join(''));

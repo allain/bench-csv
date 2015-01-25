@@ -42,4 +42,20 @@ describe('bench-csv node module', function() {
       done();
     });
   });
+  
+  it('benchmarking throws are caught and complained about', function(done) {
+    processRunner('node ' + __dirname + '/fixtures/throws.js 10', function(err, output) {
+      assert(!!err, 'expected error');
+			assert.equal(err.message, 'error running process');
+      done();
+    });
+  });
+  
+  it('benchmarking error is complained about', function(done) {
+    processRunner('node ' + __dirname + '/fixtures/errors.js 10', function(err, output) {
+      assert(!!err, 'expected error');
+			assert.equal(err.message, 'error running process');
+      done();
+    });
+  });
 });

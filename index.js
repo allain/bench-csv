@@ -12,14 +12,23 @@ function benchmark(measureFn, fn) {
   if (n || n === 0) {
     var startMeasurement = measureFn();
 
-    return fn(n, function(cb) {
-      var endMeasurement = measureFn();
-      var row = [n];
-      Object.keys(endMeasurement).forEach(function(key) {
-        row.push(endMeasurement[key] - startMeasurement[key]);
-      });
-      emitRow(row);
-    });
+		try {
+			return fn(n, function(err) {
+				if (err) {
+					throw err;
+				}
+
+				var endMeasurement = measureFn();
+				var row = [n];
+				Object.keys(endMeasurement).forEach(function(key) {
+					row.push(endMeasurement[key] - startMeasurement[key]);
+				});
+				emitRow(row);
+			});
+		} catch (e) {
+			console.error(e);
+      process.exit(1);
+		}
   }
 
   var limit = parseInt(argv._[0], 10);
@@ -49,7 +58,10 @@ function benchmark(measureFn, fn) {
     });
 
   }, function(err) {
-    if (err) console.error(err);
+    if (err) {
+			console.error(err);
+      process.exit(1);
+		}
   });
 }
 
