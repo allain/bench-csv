@@ -1,0 +1,32 @@
+{
+  "name": "bench-csv",
+  "version": "1.0.0",
+  "description": "benchmarking tool that spits its results out in csv format",
+  "author": {
+    "name": "Allain Lalonde",
+    "email": "allain.lalonde@gmail.com"
+  },
+  "repository": "allain/bench-csv",
+  "license": "ISC",
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "bench-csv",
+    "benchmark",
+    "csv"
+  ],
+  "dependencies": {
+    "async": "^0.9.0",
+    "minimist": "^1.1.0"
+  },
+  "devDependencies": {
+    "js-beautify": "^1.5.4",
+    "microtime": "^1.2.0",
+    "mocha": "^2.1.0"
+  },
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha",
+    "format": "find .  -name '*.js' -not -path './node_modules/*' | xargs node_modules/js-beautify/js/bin/js-beautify.js --replace"
+  }
+}
