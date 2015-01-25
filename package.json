@@ -6,11 +6,12 @@
     "name": "Allain Lalonde",
     "email": "allain.lalonde@gmail.com"
   },
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha",
+    "format": "find .  -name '*.js' -not -path './node_modules/*' | xargs node_modules/js-beautify/js/bin/js-beautify.js --replace"
+  },
   "repository": "allain/bench-csv",
   "license": "ISC",
-  "files": [
-    "index.js"
-  ],
   "keywords": [
     "bench-csv",
     "benchmark",
@@ -24,9 +25,5 @@
     "js-beautify": "^1.5.4",
     "microtime": "^1.2.0",
     "mocha": "^2.1.0"
-  },
-  "scripts": {
-    "test": "node_modules/mocha/bin/mocha",
-    "format": "find .  -name '*.js' -not -path './node_modules/*' | xargs node_modules/js-beautify/js/bin/js-beautify.js --replace"
   }
 }
