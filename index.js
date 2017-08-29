@@ -1,13 +1,11 @@
-var async = require('async');
+var async = require('async')
 
-var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
-var processRunner = require('./process-runner.js');
-var fs = require('fs');
+var argv = require('minimist')(process.argv.slice(2))
+var child_process = require('child_process')
+var processRunner = require('./process-runner.js')
+var fs = require('fs')
 
-module.exports = benchmark;
-
-function benchmark(measureFn, fn) {
+/* function benchmark(measureFn, fn) {
   var n = parseInt(argv.n, 10);
   if (n || n === 0) {
     var startMeasurement = measureFn();
@@ -87,3 +85,67 @@ function buildTimestamp() {
 function pad2Left(n) {
   return ('0' + n).substr(-2);
 }
+*/
+
+const defaultOptions = {
+  time: true,
+  memory: false,
+  warmups: 10,
+  repeat: 100
+}
+
+const noop = () => undefined
+
+function perform (fn, args) {
+  try {
+    return Promise.resolve(fn(args))
+  } catch (e) {
+    return Promise.reject(e)
+  }
+}
+
+function repeatFn (fn, startArg, n) {
+  let result = Promise.resolve(startArg)
+
+  for (let i = 0; i < n; i++) {
+    result = result.then(args => perform(fn, args))
+  }
+
+  return result
+}
+
+function measure (fn, args, options = {}) {
+  let start = Date.now()
+  return perform(fn).then(() => {
+    let end = Date.now()
+    return {
+      duration: end - start
+    }
+  })
+}
+
+function bm (fn, options = {}) {
+  options = Object.assign({}, defaultOptions, options)
+
+  return perform(options.beforeAll || noop, options)
+    .then(() => repeatFn(fn, [], options.warmups)) // Warmups
+    .then(() =>
+      repeatFn(
+        stats =>
+          perform(options.before || noop, options)
+            .then(() => measure(fn))
+            .then(measurements =>
+              perform(options.after || noop, options).then(() =>
+                stats.concat([measurements])
+              )
+            ),
+        [],
+        options.repeat
+      )
+    )
+    .then(stats => perform(options.afterAll || noop, options).then(() => stats))
+}
+
+bm.measure = measure
+
+module.exports = bm
