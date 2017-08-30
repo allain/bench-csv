@@ -13,6 +13,10 @@ const delay = ms =>
 const bm = require('../')
 const buildCsv = require('../src/build-csv')
 
+process.on('SIGINT', () => process.exit(0))
+process.on('SIGTERM', () => process.exit(0))
+process.on('SIGUSR2', () => process.exit(0))
+
 const args = require('minimist')(process.argv, {
   boolean: ['header', 'watch', 'watching', 'inspect'],
   default: {
