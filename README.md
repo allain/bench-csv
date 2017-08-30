@@ -1,73 +1,108 @@
 #bench-csv
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-url]][daviddm-image]
 
-benchmarking tool that spits its results out in csv format.
-
-Each run of the code being benchmarked is done in a separate process to minimize interference.
+Simple benchmarking tool that spits its results out in csv format.
 
 ## Install
 
 ```sh
-$ npm install --save bench-csv
+$ npm install -g bench-csv
 ```
 
 ## Usage
 
+### Simple Example
 **Step 1:** Write your benchmark
+
 ```js
-// example1.js (could be named anything)
-var benchmark = require('bench-csv');
-var microtime = require('microtime');
+# file: benchmark.js
+// function being benchmarked
+const randomDelay = ms => new Promise(resolve => setTimeout(resolve, Math.round(Math.random() * ms)))
 
-var counter = 0;
-
-// Calculate the metrics snapshot
-function measureMetrics() {
-	return {
-		time: microtime.now(),
-		rss: process.memoryUsage().rss,
-		counter: counter
-	};
-}
-
-// perform the work being benchmarked n times
-function performWorkAsync(n, done) {
-	// Example nastiness here
-	while (n-- > 0) {
-		counter ++;
-	}
-
-	// Inform the benchmarking tool that we're done
-	done();
-}
-
-benchmark(measureMetrics, performWorkAsync);
+// export it
+module.exports = () => randomDelay(100)
 ```
 
-**Step 2:** Run your benchmarks
+**Step 2:** run bench-csv on it
 
-Run benchmark for n=0,1,2,3,...,1000
+`bench-csv ./path/to/benchmark.js`
+
+outputs (changes every time it's run)
+```
+"pid","timestamp","memory","duration"
+"8342","2017-08-30T14:24:13.416Z","66229821","38"
+```
+
+### Better Usage Example
+
+Benchmark `slow-code.js` continously, running batches of 10 iterations with 5 warmups and waiting 60 seconds between runs:
+
 ```bash
-node example1.js 1000
+bench-csv --watch --delay=60 --warmups=5 --repeat=10 slow-code.js -o slow-code.csv
 ```
 
-Run benchmark for n=0,100,200,...,1000 (note skip param)
+Under the hood this uses nodemon to restart when the code being benchmarked changes.
+
+The `-o` param tells *bench-csv* to send its results to the file targetted, creating it if missing.
+
+## Command Line Options
+
+--watch
+
+    Runs the benchmark continously, accounting for changes in the target
+
+--delay [seconds]
+
+    When watching, how long to wait before each benchmark is performed. Defaults to 1 second
+
+--repeat [1]
+
+    How many iterations to perform each benchmark
+
+--header [true]
+
+    Whether to display the header row
+
+--delim [',']
+
+    Delimiter to use between columns of the CSV output. For tabs use `--delim="\t"` works too
+
+--warmups[=0]
+
+    Runs this many iterations before recording begins. Default to 0.
+
+--inspect
+
+    Enables remote debugging. What use would benchmarking be without profiling.
+
+## Benchmark Lifecycles
+
+Should you need it, *bench-csv* supports specifying lifecycle hooks as below:
+
+```js
+// slow-code-with-lifecycle.js
+
+// Runs before each batch of iterations
+module.exports.beforeAll = () => { ... }
+
+// Runs before each iteration
+module.exports.before = () => { ... }
+
+// The function being benchmarked
+module.exports.run = () => { ... }
+
+// Runs after each iteration
+module.exports.after = () => { ... }
+
+// Runs after each batch of iterations
+module.exports.afterAll = () => { ... }
+```
+
+Then you can benchmark it as before:
+
 ```bash
-node example1.js 1000 100
+bench-csv --watch --repeat=10 --delay=60 ./path/to/slow-code-with-lifecycle.js
 ```
-
-Optinally you can ask for CSV headers to be omitted by using:
-```bash
-node example1.js --noheader 1000 100
-```
-
-If you are only interested in collecting the benchmarks for running the code N times you may use
-```bash
-node example1.js --n=1000
-```
-
-
-
 
 ## License
 

@@ -6,8 +6,13 @@
     "name": "Allain Lalonde",
     "email": "allain.lalonde@gmail.com"
   },
+  "bin": {
+    "bench-csv": "./bin/bench-csv.js"
+  },
+  "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "node --expose-gc ./node_modules/.bin/jest",
+    "watch": "node --expose-gc ./node_modules/.bin/jest --watch"
   },
   "repository": "allain/bench-csv",
   "license": "ISC",
@@ -16,8 +21,14 @@
     "benchmark",
     "csv"
   ],
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "engineStrict": true,
   "dependencies": {
-    "minimist": "^1.2.0"
+    "fs-extra": "^4.0.1",
+    "minimist": "^1.2.0",
+    "nodemon": "^1.11.0"
   },
   "devDependencies": {
     "jest": "^20.0.4"
