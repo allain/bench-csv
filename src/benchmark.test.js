@@ -43,6 +43,11 @@ describe('benchmark', () => {
         )
       }))
 
+    it('includes tag if given', () =>
+      bm.measure(() => delay(10), { tag: 'testing' }).then(m => {
+        expect(m.tag).toEqual('testing')
+      }))
+
     it('measures duration', () =>
       bm.measure(() => delay(10)).then(m => {
         expect(typeof m.duration).toBe('number')

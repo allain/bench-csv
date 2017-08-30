@@ -50,6 +50,10 @@ async function measure (fn, options = {}) {
       memEnd.heapUsed
   )
 
+  if (options.tag) {
+    measurement.tag = options.tag
+  }
+
   return measurement
 }
 
