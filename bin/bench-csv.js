@@ -104,6 +104,8 @@ prepareOptions(args)
       nodemon(
         '--expose-gc ' +
           (options.inspect ? '--inspect ' : '') +
+          (options['trace-opt'] ? '--trace-opt ' : '') +
+          (options['trace-deopt'] ? '--trace-deopt ' : '') +
           buildCommand(newOptions)
       )
     }
