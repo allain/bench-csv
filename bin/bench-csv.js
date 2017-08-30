@@ -83,6 +83,7 @@ prepareOptions(args)
       let stats = await bm(target, options)
       await emitStats(stats, options)
       options.header = false
+      options.warmups = false // After first run when being watched no need to run warmups between
     } while (options.watching && (await delay(options.delay * 1000)))
 
     if (options.watch) {
