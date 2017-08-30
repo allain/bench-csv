@@ -1,3 +1,5 @@
+const generateId = require('shortid').generate
+
 const defaultOptions = {
   warmups: 10,
   repeat: 100
@@ -63,6 +65,8 @@ async function benchmark (fn, options = {}) {
 
   let stats = []
 
+  let batchId = null
+
   await repeatFn(
     async () => {
       if (options.before) await perform(options.before, options)
@@ -71,6 +75,10 @@ async function benchmark (fn, options = {}) {
 
       if (options.after) await perform(options.after, options)
 
+      if (options.repeat > 1) {
+        // Include batch in stats output
+        measurements.batch = batchId || (batchId = generateId())
+      }
       stats.push(measurements)
     },
     [],
