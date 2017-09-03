@@ -4,8 +4,7 @@ const path = require('path')
 const { promisify } = require('util')
 const buildCommand = require('../src/build-command')
 const nodemon = require('nodemon')
-const exists = promisify(require('fs').exists)
-const appendFile = promisify(require('fs').appendFile)
+const fs = require('fs-extra')
 
 const delay = ms =>
   new Promise(resolve => setTimeout(() => resolve(Date.now()), ms))
@@ -40,7 +39,7 @@ async function prepareOptions (cmdLineOptions) {
   }
 
   let targetPath = path.resolve(process.cwd(), target)
-  if (!exists(targetPath)) throw new Error(`not found: ${targetPath}`)
+  if (!await fs.exists(targetPath)) throw new Error(`not found: ${targetPath}`)
 
   const targetSpec = require(targetPath)
   let options
@@ -67,11 +66,17 @@ async function prepareOptions (cmdLineOptions) {
 
 async function emitStats (stats, options) {
   const delim = JSON.parse('"' + options.delim + '"')
-  const emitHeader = options.header && (!options.o || !await exists(options.o))
+  const emitHeader =
+    options.header && (!options.o || !await fs.exists(options.o))
   if (options.o) {
     // Write to file
-    await appendFile(
-      path.resolve(process.cwd(), options.o),
+    const outputPath = path.resolve(process.cwd(), options.o)
+    if (!await fs.exists(outputPath)) {
+      await fs.mkdirp(path.dirname(outputPath))
+    }
+
+    await fs.appendFile(
+      outputPath,
       buildCsv(stats, delim, emitHeader) + '\n',
       'utf-8'
     )
@@ -101,13 +106,18 @@ prepareOptions(args)
         watching: true // so that children know they're being watched and wil lrun forever
       }
 
-      nodemon(
-        '--expose-gc ' +
-          (options.inspect ? '--inspect ' : '') +
-          (options['trace-opt'] ? '--trace-opt ' : '') +
-          (options['trace-deopt'] ? '--trace-deopt ' : '') +
-          buildCommand(newOptions)
-      )
+      const nodeOptions = { 'expose-gc': true }
+      for (let opt of [
+        'inspect',
+        'trace-opt',
+        'trace-deopt',
+        'trace-opt-verbose'
+      ]) {
+        if (options[opt]) {
+          nodeOptions[opt] = true
+        }
+      }
+      nodemon(buildCommand(nodeOptions) + ' ' + buildCommand(newOptions))
     }
   })
   .catch(e => {
